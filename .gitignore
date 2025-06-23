@@ -10,14 +10,14 @@ env/
 .venv/
 
 # Large data files
-feature_matrices/
+# feature_matrices/
 preprocessed_data/
 data/
 *.npy
 *.csv
 *.h5
 *.hdf5
-*.pkl
+# *.pkl
 *.pkl.gz
 *.npz
 *.npy
