@@ -29,14 +29,35 @@ Crowdfunding platforms face significant challenges with fraudulent campaigns tha
 ## Project Structure
 ```
 crowdfundingproject/
-├── data/                   # Raw and processed data files
-├── scripts/                # Python scripts
+├── crowdfunding/           # Main package directory
+│   └── (package files)     # Python package files
+│
+├── models/                # Trained model files
+│   └── (model files)       # Saved model checkpoints
+│
+├── notebooks/             # Jupyter notebooks for analysis
+│   └── (notebook files)    # Data exploration and model development
+│
+├── processed_data/        # Processed and cleaned data
+│   └── (data files)        # Intermediate and final data files
+│
+├── scripts/               # Python scripts
 │   ├── streamlit_app.py    # Main Streamlit application
 │   ├── kemikal.py          # Data processing and model utilities
 │   └── kiva.py             # Kiva API integration
-├── .env                    # Environment variables
-├── .gitignore              # Git ignore file
-└── README.md               # Project documentation
+│
+├── visualizations/        # Generated visualizations and plots
+│   └── (image files)       # Charts, graphs, and other visual assets
+│
+├── feature_matrices/      # Feature extraction and transformation
+│   ├── X_all.npy           # Processed feature matrix
+│   ├── *_model.pkl         # Trained model files
+│   └── (other feature files)
+│
+├── .env                   # Environment variables
+├── .gitignore             # Git ignore file
+├── requirements.txt       # Python dependencies
+└── README.md             # Project documentation
 ```
 
 ## Getting Started
