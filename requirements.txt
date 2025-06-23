@@ -3,3 +3,8 @@ pandas
 matplotlib
 scikit-learn
 seaborn
+sentence-transformers
+imblearn
+scipy
+xgboost
+streamlit
