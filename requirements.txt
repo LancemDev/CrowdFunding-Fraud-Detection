@@ -8,3 +8,4 @@ imblearn
 scipy
 xgboost
 streamlit
+joblib
