@@ -8,3 +8,7 @@ __pycache__
 venv/
 env/
 .venv/
+
+# Large data files
+feature_matrices/
+*.npy
