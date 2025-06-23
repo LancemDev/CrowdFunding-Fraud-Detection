@@ -2,9 +2,6 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from pathlib import Path
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.decomposition import TruncatedSVD
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from scipy.sparse import hstack, csr_matrix
 import joblib
 from datetime import datetime
@@ -12,10 +9,6 @@ from datetime import datetime
 # Configure paths
 PROJECT_ROOT = Path.cwd()
 FEATURE_DIR = PROJECT_ROOT / 'feature_matrices'
-TFIDF_MAX_FEAT = 10000
-TFIDF_NGRAMS = (1, 2)
-SVD_COMPONENTS = 300
-RANDOM_STATE = 42
 
 # Load models
 @st.cache_resource
@@ -30,58 +23,38 @@ def load_models():
         return None, None, None
 
 rf_model, xgb_model, lr_model = load_models()
+if all(model is None for model in [rf_model, xgb_model, lr_model]):
+    st.stop()
 
-# Initialize feature extractors
+# Load feature extractors
 @st.cache_resource
-def initialize_extractors():
-    tfidf = TfidfVectorizer(max_features=TFIDF_MAX_FEAT, ngram_range=TFIDF_NGRAMS, stop_words='english')
-    svd = TruncatedSVD(n_components=SVD_COMPONENTS, random_state=RANDOM_STATE)
-    scaler = StandardScaler()
-    ohe = OneHotEncoder(handle_unknown='ignore', sparse_output=True)
-    return tfidf, svd, scaler, ohe
-
-tfidf, svd, scaler, ohe = initialize_extractors()
-
-# Fit extractors on training data (approximate using saved X_all)
-@st.cache_resource
-def fit_extractors():
+def load_extractors():
     try:
-        X_all = np.load(FEATURE_DIR / 'X_all.npy')
-        # Assume X_all structure: [SVD (300), categorical (~30), numerical (6)]
-        num_cols = ['goal', 'pledged', 'usd_pledged', 'duration_days', 'pledged_to_goal', 'backers']
-        cat_cols = ['main_category', 'currency', 'state']
-        num_features = len(num_cols)
-        cat_features = X_all.shape[1] - SVD_COMPONENTS - num_features
-        # Dummy data to fit encoders (simplified)
-        dummy_text = ['sample text'] * X_all.shape[0]
-        dummy_num = X_all[:, -num_features:]  # Last 6 columns
-        dummy_cat = pd.DataFrame({
-            col: ['unknown'] * X_all.shape[0] for col in cat_cols
-        })
-        # Fit transformers
-        X_tfidf = tfidf.fit_transform(dummy_text)
-        svd.fit(X_tfidf)
-        scaler.fit(dummy_num)
-        ohe.fit(dummy_cat)
-        return True
-    except Exception as e:
-        st.error(f"Error fitting extractors: {e}")
-        return False
+        tfidf = joblib.load(FEATURE_DIR / 'tfidf.pkl')
+        svd = joblib.load(FEATURE_DIR / 'svd.pkl')
+        scaler = joblib.load(FEATURE_DIR / 'scaler.pkl')
+        ohe = joblib.load(FEATURE_DIR / 'ohe.pkl')
+        return tfidf, svd, scaler, ohe
+    except FileNotFoundError as e:
+        st.error(f"Extractor files not found in {FEATURE_DIR}: {e}. Please save tfidf.pkl, svd.pkl, scaler.pkl, ohe.pkl using the notebook.")
+        return None, None, None, None
 
-if not fit_extractors():
+tfidf, svd, scaler, ohe = load_extractors()
+if all(extractor is None for extractor in [tfidf, svd, scaler, ohe]):
     st.stop()
 
 # Streamlit app
 st.title("Crowdfunding Fraud Detection")
-st.write("Enter campaign details to predict fraud risk using Random Forest, XGBoost, and Logistic Regression models.")
+st.write("Enter campaign details to predict the likelihood of fraud using Random Forest, XGBoost, and Logistic Regression models.")
+st.markdown("**Note**: XGBoost is the most reliable model (F1-Score ~0.90 for fraud detection).")
 
 # Input form
 with st.form(key='campaign_form'):
     st.subheader("Campaign Details")
-    blurb = st.text_area("Blurb or Name", placeholder="Enter campaign description or title")
-    goal = st.number_input("Funding Goal ($)", min_value=0.0, value=1000.0)
-    pledged = st.number_input("Amount Pledged ($)", min_value=0.0, value=0.0)
-    backers = st.number_input("Number of Backers", min_value=0, value=0)
+    blurb = st.text_area("Campaign Description or Title", placeholder="e.g., Revolutionary smartwatch with advanced features")
+    goal = st.number_input("Funding Goal ($)", min_value=0.0, value=1000.0, step=100.0)
+    pledged = st.number_input("Amount Pledged ($)", min_value=0.0, value=0.0, step=10.0)
+    backers = st.number_input("Number of Backers", min_value=0, value=0, step=1)
     main_category = st.selectbox("Main Category", [
         'Art', 'Comics', 'Crafts', 'Dance', 'Design', 'Fashion', 'Film & Video',
         'Food', 'Games', 'Journalism', 'Music', 'Photography', 'Publishing',
@@ -91,11 +64,21 @@ with st.form(key='campaign_form'):
     state = st.selectbox("Campaign State", ['failed', 'successful', 'canceled', 'live', 'suspended', 'unknown'])
     launched = st.date_input("Launched Date", value=datetime.now())
     deadline = st.date_input("Deadline Date", value=datetime.now())
-    submit_button = st.form_submit_button(label='Predict Fraud')
+    submit_button = st.form_submit_button(label="Predict Fraud Risk")
 
 # Process inputs and predict
 if submit_button:
     try:
+        # Validate inputs
+        if deadline < launched:
+            st.error("Deadline must be after launched date.")
+            st.stop()
+        if goal < 0 or pledged < 0 or backers < 0:
+            st.error("Goal, pledged, and backers must be non-negative.")
+            st.stop()
+        if not blurb.strip():
+            st.warning("Description is empty. Using default empty text.")
+
         # Create input DataFrame
         input_data = pd.DataFrame({
             'blurb': [blurb if blurb else ''],
@@ -155,6 +138,10 @@ if submit_button:
             results_df = pd.DataFrame.from_dict(results, orient='index', columns=['Fraud Probability (%)'])
             st.write("**Model Comparison**")
             st.dataframe(results_df.style.format({'Fraud Probability (%)': '{:.2f}'}))
+
+            # Bar chart
+            st.write("**Fraud Probability Visualization**")
+            st.bar_chart(results_df)
 
     except Exception as e:
         st.error(f"Error processing input: {e}")

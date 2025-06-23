@@ -2,57 +2,41 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white)](https://streamlit.io/)
 
 ## Project Overview
-This project develops a machine learning model to classify crowdfunding campaigns as potentially fraudulent or legitimate. By analyzing project descriptions, funding patterns, and metadata, the system helps identify suspicious campaigns before they can cause financial harm to backers.
+This project develops a machine learning model to classify crowdfunding campaigns as potentially fraudulent or legitimate. The system helps identify suspicious campaigns before they can cause financial harm to backers through a user-friendly web interface.
 
 ## Problem Statement
 Crowdfunding platforms face significant challenges with fraudulent campaigns that can mislead backers and damage platform credibility. This project addresses this issue through a data-driven approach that combines:
 - Natural Language Processing (NLP) of project descriptions and titles
-- Analysis of funding patterns and backer behavior
-- Examination of creator history and campaign metadata
+- Analysis of funding patterns and campaign metadata
+- Interactive web interface for real-time predictions
 
 ## Features
 
-### Data Collection
-- Automated scraping of crowdfunding platforms
-- Integration with Kaggle datasets
-- Data preprocessing and cleaning pipelines
-
-### Analysis
-- Exploratory Data Analysis (EDA) with Jupyter Notebooks
-- Interactive visualizations
-- Statistical analysis of campaign patterns
+### Web Application
+- Interactive Streamlit-based web interface
+- Real-time fraud prediction
+- User-friendly input forms for campaign details
+- Visual feedback on prediction results
 
 ### Machine Learning
+- Pre-trained classification models
 - Feature engineering for fraud detection
-- Multiple classification algorithms (Random Forest, XGBoost, etc.)
 - Model evaluation and interpretation
-
-## Dataset
-The project utilizes multiple data sources:
-1. **Kickstarter Projects Dataset**
-   - Project titles, descriptions, and updates
-   - Funding goals and amounts raised
-   - Backer statistics and campaign durations
-   - Project categories and outcomes
-
-2. **Additional Sources**
-   - Live campaign data from various platforms
-   - Historical success/failure rates
-   - Creator history and reputation metrics
 
 ## Project Structure
 ```
-crowdfunding-project/
-├── data/                   # Raw data files
-├── preprocessed_data/      # Cleaned and processed data
-├── notebooks/              # Jupyter notebooks for analysis
-├── scripts/                # Python scripts for data processing
-├── models/                 # Trained models and weights
-├── visualizations/         # Generated plots and figures
-├── requirements.txt        # Python dependencies
-└── README.md              # Project documentation
+crowdfundingproject/
+├── data/                   # Raw and processed data files
+├── scripts/                # Python scripts
+│   ├── streamlit_app.py    # Main Streamlit application
+│   ├── kemikal.py          # Data processing and model utilities
+│   └── kiva.py             # Kiva API integration
+├── .env                    # Environment variables
+├── .gitignore              # Git ignore file
+└── README.md               # Project documentation
 ```
 
 ## Getting Started
@@ -60,14 +44,14 @@ crowdfunding-project/
 ### Prerequisites
 - Python 3.8+
 - pip (Python package manager)
-- Jupyter Notebook (for interactive analysis)
+- Streamlit for the web interface
 
 ### Installation
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/crowdfunding-fraud-detection.git
-   cd crowdfunding-fraud-detection
+   git clone https://github.com/LancemDev/CrowdFunding-Fraud-Detection.git
+   cd CrowdFunding-Fraud-Detection
    ```
 
 2. **Create and activate a virtual environment**
@@ -81,42 +65,31 @@ crowdfunding-project/
    pip install -r requirements.txt
    ```
 
-4. **Set up Kaggle API** (for dataset access)
-   - Create a Kaggle account if you don't have one
-   - Go to Account -> Create New API Token
-   - Place the downloaded `kaggle.json` in `~/.kaggle/`
-   - Make it read-only: `chmod 600 ~/.kaggle/kaggle.json`
-
 ### Usage
 
-1. **Run the data pipeline**
+1. **Run the Streamlit application**
    ```bash
-   python scripts/data_pipeline.py
+   streamlit run scripts/streamlit_app.py
    ```
 
-2. **Explore the data**
-   ```bash
-   jupyter notebook notebooks/exploratory_analysis.ipynb
-   ```
-
-3. **Train the model**
-   ```bash
-   python scripts/train_model.py
-   ```
+2. **Access the web interface**
+   - Open your web browser and navigate to the local URL provided in the terminal (typically http://localhost:8501)
+   - Fill in the campaign details in the form
+   - Click "Predict" to get the fraud prediction
 
 ## Technologies Used
 
 ### Core Technologies
 - Python 3.8+
-- Scikit-learn
-- Pandas & NumPy
-- Matplotlib/Seaborn
-- Jupyter Notebooks
+- Streamlit for web interface
+- Scikit-learn for machine learning
+- Pandas & NumPy for data processing
 
-### Additional Tools
-- Kaggle API for dataset access
-- Scrapy for web scraping
-- Plotly for interactive visualizations
+### Dependencies
+- python-dotenv for environment variables
+- scikit-learn for machine learning models
+- pandas for data manipulation
+- numpy for numerical operations
 
 ## Contributing
 
@@ -133,12 +106,6 @@ We welcome contributions! Please follow these steps:
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
-- Kaggle for providing the Kickstarter dataset
+- Streamlit for the amazing web framework
 - Open-source contributors to the Python data science ecosystem
 - Academic research on fraud detection methodologies
-
-## License
-This project is open-source and available under the [MIT License](LICENSE).
-
-## Contributing
-Contributions are welcome! Please read our contributing guidelines before submitting pull requests.
